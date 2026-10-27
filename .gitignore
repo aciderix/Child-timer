@@ -13,3 +13,11 @@
 .externalNativeBuild
 .cxx
 local.properties
+
+# Local signing keys must never be committed.
+*.jks
+*.keystore
+*.p12
+
+# Build outputs are published through GitHub Releases instead.
+*.apk
