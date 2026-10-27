@@ -1,0 +1,1 @@
+Dépose ici la capture d’écran du cadran, en mode paysage, sous le nom main-screen.png. Le README racine l’affichera automatiquement.
