@@ -15,19 +15,7 @@ android {
     versionName = "1.0"
   }
 
-  signingConfigs {
-    getByName("debug") {
-      storeFile = file("${rootDir}/debug.keystore")
-      storePassword = "android"
-      keyAlias = "androiddebugkey"
-      keyPassword = "android"
-    }
-  }
-
   buildTypes {
-    debug {
-      signingConfig = signingConfigs.getByName("debug")
-    }
     release {
       isMinifyEnabled = false
       proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
@@ -74,17 +62,19 @@ dependencies {
   implementation(libs.androidx.compose.ui.tooling.preview)
   implementation(libs.androidx.compose.material3)
   implementation(libs.androidx.compose.material.icons.extended)
+
   // Tooling
   debugImplementation(libs.androidx.compose.ui.tooling)
+
   // Instrumented tests
   androidTestImplementation(libs.androidx.compose.ui.test.junit4)
   debugImplementation(libs.androidx.compose.ui.test.manifest)
 
-  // Local tests: jUnit, coroutines, Android runner
+  // Local tests
   testImplementation(libs.junit)
   testImplementation(libs.kotlinx.coroutines.test)
 
-  // Instrumented tests: jUnit rules and runners
+  // Instrumented tests
   androidTestImplementation(libs.androidx.test.core)
   androidTestImplementation(libs.androidx.test.ext.junit)
   androidTestImplementation(libs.androidx.test.runner)
