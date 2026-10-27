@@ -14,6 +14,11 @@
   <img src="docs/screenshots/main-screen.png" alt="Child Timer en mode paysage : cadran circulaire et animaux pour choisir une durée" width="900">
 </p>
 
+<p align="center">
+  <a href="ChildTimer.apk?raw=1"><strong>⬇️ Télécharger l’APK Android (build de test)</strong></a><br>
+  <sub>Le fichier actuel est identique à <code>app-debug.apk</code>. Pour une version de production signée, consulte les GitHub Releases.</sub>
+</p>
+
 ## 🧸 À propos
 
 **Child Timer** est une application Android minimaliste qui représente une durée sous la forme d'un secteur coloré sur un cadran. L'enfant choisit l'un des animaux placés autour du cadran, puis lance le timer. Le secteur turquoise se réduit progressivement jusqu'à la fin du temps choisi.
@@ -158,7 +163,7 @@ Le workflow construit un APK release, le signe, vérifie sa signature puis crée
 
 **Avant la toute première release publique**, vérifie également que l'identifiant Android <code>applicationId = "com.aistudio.childtimer.kxrqzp"</code> est bien celui que tu souhaites conserver. Le changer après la publication empêcherait l'APK suivant d'être reconnu comme une mise à jour de cette application.
 
-Les APK de téléchargement publiés seront disponibles dans les [GitHub Releases](https://github.com/aciderix/Child-timer/releases).
+Pour installer rapidement la build de test, utilise le lien de téléchargement en haut du README. Les versions de production signées seront disponibles dans les [GitHub Releases](https://github.com/aciderix/Child-timer/releases) une fois la clé de signature configurée.
 
 ## 🔒 Confidentialité
 
