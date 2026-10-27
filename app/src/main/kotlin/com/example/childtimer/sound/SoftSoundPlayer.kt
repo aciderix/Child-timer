@@ -35,50 +35,52 @@ class SoftSoundPlayer(private val context: Context) {
 
     fun isMuted(): Boolean = isMuted
 
-    // Soft water-drop / wood-block tap when touching an animal
+    // Soft, deep, warm wood-block click when touching an animal (low pitch D4 = 293 Hz)
     fun playAnimalTap(scope: CoroutineScope) {
         if (isMuted) return
         vibrateShort(25)
         scope.launch(Dispatchers.Default) {
-            playTone(frequency = 587.33, durationMs = 90, volume = 0.45) // D5
+            playTone(frequency = 293.66, durationMs = 80, volume = 0.4) // Deep D4
         }
     }
 
-    // Gentle ascending chime when starting the timer
+    // Gentle ascending low-pitch chime when starting the timer (C4 -> E4)
     fun playStartChime(scope: CoroutineScope) {
         if (isMuted) return
         vibrateShort(40)
         scope.launch(Dispatchers.Default) {
-            playTone(frequency = 523.25, durationMs = 140, volume = 0.4) // C5
-            kotlinx.coroutines.delay(100)
-            playTone(frequency = 659.25, durationMs = 200, volume = 0.45) // E5
+            playTone(frequency = 261.63, durationMs = 150, volume = 0.4) // C4
+            kotlinx.coroutines.delay(110)
+            playTone(frequency = 329.63, durationMs = 220, volume = 0.4) // E4
         }
     }
 
-    // Gentle completion chime played ONCE at the end of the timer
+    // Soothing, warm completion chime at the end of the timer (C4 -> E4 -> G4 -> C5)
     fun playCompletionChime(scope: CoroutineScope) {
         if (isMuted) return
         vibrateCelebration()
         scope.launch(Dispatchers.Default) {
             val notes = listOf(
-                523.25 to 220, // C5
-                659.25 to 220, // E5
-                783.99 to 260, // G5
-                1046.50 to 550 // C6
+                261.63 to 240, // C4
+                329.63 to 240, // E4
+                392.00 to 280, // G4
+                523.25 to 600  // C5
             )
             for ((freq, dur) in notes) {
-                playTone(frequency = freq, durationMs = dur, volume = 0.5)
+                playTone(frequency = freq, durationMs = dur, volume = 0.45)
+                kotlinx.coroutines.delay((dur * 0.75).toLong())
             }
         }
     }
+
     // Feedback when toggling sound via 3s long press
     fun playToggleSoundFeedback(unmuted: Boolean, scope: CoroutineScope) {
         vibrateShort(60)
         if (unmuted) {
             scope.launch(Dispatchers.Default) {
-                playTone(frequency = 523.25, durationMs = 120, volume = 0.4) // C5
+                playTone(frequency = 261.63, durationMs = 130, volume = 0.4) // C4
                 kotlinx.coroutines.delay(90)
-                playTone(frequency = 783.99, durationMs = 180, volume = 0.45) // G5
+                playTone(frequency = 392.00, durationMs = 190, volume = 0.4) // G4
             }
         }
     }
@@ -88,23 +90,23 @@ class SoftSoundPlayer(private val context: Context) {
         vibrateCelebration()
     }
 
-    private fun playTone(frequency: Double, durationMs: Int, volume: Double = 0.5) {
+    private fun playTone(frequency: Double, durationMs: Int, volume: Double = 0.4) {
         try {
             val numSamples = (sampleRate * (durationMs / 1000.0)).toInt()
             val samples = ShortArray(numSamples)
-            val attackSamples = (sampleRate * 0.015).toInt().coerceAtLeast(1) // 15ms soft attack
+            val attackSamples = (sampleRate * 0.020).toInt().coerceAtLeast(1) // 20ms soft attack
 
             for (i in 0 until numSamples) {
                 val t = i.toDouble() / sampleRate
-                // Fundamental sine wave + subtle warm harmonic overtone (octave)
+                // Fundamental sine wave + very subtle warm overtone
                 val fundamental = sin(2.0 * Math.PI * frequency * t)
-                val harmonic = 0.25 * sin(4.0 * Math.PI * frequency * t)
+                val harmonic = 0.08 * sin(4.0 * Math.PI * frequency * t)
                 val rawWave = fundamental + harmonic
 
-                // Envelope: smooth cubic attack + natural exponential decay
+                // Envelope: smooth cubic attack + gentle natural exponential decay
                 val envelope = when {
                     i < attackSamples -> (i.toDouble() / attackSamples).let { it * it }
-                    else -> exp(-4.5 * (i - attackSamples).toDouble() / numSamples)
+                    else -> exp(-4.0 * (i - attackSamples).toDouble() / numSamples)
                 }
 
                 val sampleVal = (rawWave * envelope * volume * Short.MAX_VALUE).coerceIn(
@@ -141,7 +143,7 @@ class SoftSoundPlayer(private val context: Context) {
             audioTrack.write(samples, 0, numSamples)
             audioTrack.play()
 
-            // Release after playing
+            // Release track resources after playback
             Thread {
                 try {
                     Thread.sleep(durationMs.toLong() + 50)
