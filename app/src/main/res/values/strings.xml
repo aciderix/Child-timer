@@ -1,0 +1,18 @@
+<resources>
+    <string name="app_name">Child Timer</string>
+    <string name="start_timer">Start</string>
+    <string name="pause_timer">Pause</string>
+    <string name="resume_timer">Resume</string>
+    <string name="reset_timer">Reset</string>
+    <string name="time_up_title">Bravo ! Time\'s up!</string>
+    <string name="time_up_desc">You completed your activity! You earned a star!</string>
+    <string name="select_animal">Choose Animal Buddy</string>
+    <string name="quick_routines">Quick Routines</string>
+    <string name="custom_timer">Custom Timer</string>
+    <string name="lock_controls">Child Lock</string>
+    <string name="unlock_controls">Hold to Unlock</string>
+    <string name="sound_enabled">Sound Effects</string>
+    <string name="tick_enabled">Tick Sound</string>
+    <string name="vibration_enabled">Vibration</string>
+    <string name="stars_earned">Stars Earned</string>
+</resources>

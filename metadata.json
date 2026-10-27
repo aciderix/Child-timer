@@ -1,0 +1,6 @@
+{
+  "name": "Child Timer",
+  "description": "A cheerful visual countdown timer for children with adorable animal companions, routine presets, and celebratory rewards.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
