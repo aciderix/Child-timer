@@ -1,5 +1,5 @@
 <div align="center">
-  <h1>Child Timer 🦊⏱️</h1>
+  <h1><img src="app/src/main/res/drawable/ic_app_fox.png" alt="" width="48" valign="middle"> Child Timer</h1>
   <p><strong>Le temps devient visible, simplement.</strong></p>
   <p>Un minuteur visuel Android conçu pour aider les enfants à comprendre le temps qui passe, sans chiffres au cadran ni compte à rebours numérique.</p>
   <p>
