@@ -36,18 +36,19 @@ L'interface est volontairement immersive : elle fonctionne en **paysage**, masqu
 
 | Position du cadran | Animal | Durée |
 |---|---|---:|
-| 1 h | 🐻 Ours | 5 min |
-| 2 h | 🦉 Hibou | 10 min |
-| 3 h | 🐰 Lapin | 15 min |
-| 4 h | 🦊 Renard | 20 min |
-| 5 h | 🐊 Croco | 25 min |
-| 6 h | 🦓 Zèbre | 30 min |
-| 7 h | 🐒 Singe | 35 min |
-| 8 h | 🐘 Éléphant | 40 min |
-| 9 h | 🦒 Girafe | 45 min |
-| 10 h | 🐿️ Écureuil | 50 min |
-| 11 h | 🐼 Panda | 55 min |
-| 12 h | 🦁 Lion | 60 min |
+| 1 h | <img src="app/src/main/res/drawable/ours.png" alt="Ours" width="42"> Ours | 5 min |
+| 2 h | <img src="app/src/main/res/drawable/hibou.png" alt="Hibou" width="42"> Hibou | 10 min |
+| 3 h | <img src="app/src/main/res/drawable/lapin.png" alt="Lapin" width="42"> Lapin | 15 min |
+| 4 h | <img src="app/src/main/res/drawable/renard.png" alt="Renard" width="42"> Renard | 20 min |
+| 5 h | <img src="app/src/main/res/drawable/croco.png" alt="Croco" width="42"> Croco | 25 min |
+| 6 h | <img src="app/src/main/res/drawable/zebre.png" alt="Zèbre" width="42"> Zèbre | 30 min |
+| 7 h | <img src="app/src/main/res/drawable/singe.png" alt="Singe" width="42"> Singe | 35 min |
+| 8 h | <img src="app/src/main/res/drawable/elephant.png" alt="Éléphant" width="42"> Éléphant | 40 min |
+| 9 h | <img src="app/src/main/res/drawable/girafe.png" alt="Girafe" width="42"> Girafe | 45 min |
+| 10 h | <img src="app/src/main/res/drawable/ecureuil.png" alt="Écureuil" width="42"> Écureuil | 50 min |
+| 11 h | <img src="app/src/main/res/drawable/panda.png" alt="Panda" width="42"> Panda | 55 min |
+| 12 h | <img src="app/src/main/res/drawable/lion.png" alt="Lion" width="42"> Lion | 60 min |
+
 
 ## ▶️ Utilisation
 
