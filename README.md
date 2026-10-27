@@ -15,8 +15,7 @@
 </p>
 
 <p align="center">
-  <a href="ChildTimer.apk?raw=1"><strong>⬇️ Télécharger l’APK Android (build de test)</strong></a><br>
-  <sub>Le fichier actuel est identique à <code>app-debug.apk</code>. Pour une version de production signée, consulte les GitHub Releases.</sub>
+  <a href="https://github.com/aciderix/Child-timer/raw/refs/heads/main/ChildTimer.apk"><strong>⬇️ Télécharger l’APK Android</strong></a>
 </p>
 
 ## 🧸 À propos
