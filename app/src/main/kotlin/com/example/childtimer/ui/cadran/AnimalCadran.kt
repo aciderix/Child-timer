@@ -35,8 +35,6 @@ import com.example.childtimer.R
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
@@ -61,11 +59,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.childtimer.model.CadranAnimal
 import com.example.childtimer.model.CadranAnimals
+import com.example.childtimer.model.CadranDisplayMode
+import com.example.childtimer.model.TimerThemeColor
 import com.example.childtimer.ui.theme.DialBorderColor
 import com.example.childtimer.ui.theme.DialTrackColor
-import com.example.childtimer.ui.theme.PastelTurquoise
-import com.example.childtimer.ui.theme.PastelTurquoiseLight
-import com.example.childtimer.ui.theme.PastelTurquoiseSoft
 import com.example.childtimer.ui.theme.SoftCharcoal
 import com.example.childtimer.ui.theme.WarmWhite
 import kotlinx.coroutines.delay
@@ -79,17 +76,14 @@ fun AnimalCadran(
     remainingRatio: Float, // 1f down to 0f when running, 1f when selected
     isRunning: Boolean,
     isFinished: Boolean,
-    isMuted: Boolean,
-    soundFeedbackMessage: String?,
+    displayMode: CadranDisplayMode,
+    themeColor: TimerThemeColor,
     onSelectAnimal: (CadranAnimal) -> Unit,
     onResetClick: () -> Unit,
-    onToggleSound: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val scope = rememberCoroutineScope()
     var holdProgress by remember { mutableFloatStateOf(0f) }
-    var rapidTapCount by remember { mutableIntStateOf(0) }
-    var lastTapTimestamp by remember { mutableLongStateOf(0L) }
 
     BoxWithConstraints(
         modifier = modifier.testTag("cadran_animal_container"),
@@ -134,7 +128,7 @@ fun AnimalCadran(
             label = "celebrationScale"
         )
 
-        // Main Drawing Canvas: Dial Background, Clock Ticks, and Turquoise Sector
+        // Main Drawing Canvas: Dial Background, Clock Ticks, and Colored Sector
         Canvas(modifier = Modifier.size(diameterDp)) {
             // 1. Outer circular clock face plate (Cream background behind animals and dial)
             drawCircle(
@@ -165,7 +159,7 @@ fun AnimalCadran(
                 style = Stroke(width = with(density) { 2.dp.toPx() })
             )
 
-            // 3. Subtle tick dots around the disc circumference (NO NUMBERS)
+            // 3. Subtle tick dots around the disc circumference (NO NUMBERS on the inner disk)
             for (min in 0 until 60) {
                 val isFiveMin = min % 5 == 0
                 val angleDeg = min * 6f - 90f
@@ -185,7 +179,7 @@ fun AnimalCadran(
                 )
             }
 
-            // 4. Colored Sector: Soft Pastel Turquoise from 12 o'clock (-90°) clockwise
+            // 4. Colored Sector: Selected theme color from 12 o'clock (-90°) clockwise
             if (animatedSweepAngle > 0.5f) {
                 val sectorRadius = discRadiusPx - with(density) { 1.dp.toPx() }
                 val sectorTopLeft = Offset(centerPx.x - sectorRadius, centerPx.y - sectorRadius)
@@ -195,8 +189,8 @@ fun AnimalCadran(
                 drawArc(
                     brush = Brush.radialGradient(
                         colors = listOf(
-                            PastelTurquoiseSoft,
-                            PastelTurquoise
+                            themeColor.softColor,
+                            themeColor.primaryColor
                         ),
                         center = centerPx,
                         radius = sectorRadius
@@ -210,7 +204,7 @@ fun AnimalCadran(
 
                 // Subtle edge line at the start (12h)
                 drawLine(
-                    color = PastelTurquoiseLight.copy(alpha = 0.8f),
+                    color = themeColor.lightColor.copy(alpha = 0.8f),
                     start = centerPx,
                     end = Offset(centerPx.x, centerPx.y - sectorRadius),
                     strokeWidth = with(density) { 2.dp.toPx() },
@@ -222,7 +216,7 @@ fun AnimalCadran(
                 val edgeX = centerPx.x + (sectorRadius * cos(sweepRad)).toFloat()
                 val edgeY = centerPx.y + (sectorRadius * sin(sweepRad)).toFloat()
                 drawLine(
-                    color = PastelTurquoiseLight.copy(alpha = 0.8f),
+                    color = themeColor.lightColor.copy(alpha = 0.8f),
                     start = centerPx,
                     end = Offset(edgeX, edgeY),
                     strokeWidth = with(density) { 2.5.dp.toPx() },
@@ -254,16 +248,15 @@ fun AnimalCadran(
         }
 
         // Center Knob Interactive Area:
-        // - 3 seconds hold: toggles sound on/off
-        // - 10 rapid taps: resets timer
-        // - In finished mode: 1 tap restarts
+        // - In finished mode: 1 tap restarts immediately!
+        // - During running / selecting: 3 seconds hold triggers reset
         Box(
             modifier = Modifier
                 .size(if (isFinished) animalSizeDp * 1.45f else knobDiameterDp)
-                .pointerInput(isFinished, isMuted) {
+                .pointerInput(isFinished, isRunning, selectedMinutes) {
                     awaitEachGesture {
                         val down = awaitFirstDown(requireUnconsumed = false)
-                        var longPressHandled = false
+                        var holdCompleted = false
 
                         val holdJob = scope.launch {
                             val totalHoldMs = 3000L
@@ -274,29 +267,18 @@ fun AnimalCadran(
                                 elapsed += stepMs
                                 holdProgress = (elapsed.toFloat() / totalHoldMs).coerceIn(0f, 1f)
                             }
-                            longPressHandled = true
+                            holdCompleted = true
                             holdProgress = 0f
-                            onToggleSound()
+                            onResetClick() // 3 seconds hold resets!
                         }
 
                         val up = waitForUpOrCancellation()
                         holdJob.cancel()
                         holdProgress = 0f
 
-                        if (up != null && !longPressHandled) {
-                            val now = System.currentTimeMillis()
-                            if (now - lastTapTimestamp < 500L) {
-                                rapidTapCount++
-                            } else {
-                                rapidTapCount = 1
-                            }
-                            lastTapTimestamp = now
-
-                            if (rapidTapCount >= 10) {
-                                rapidTapCount = 0
-                                onResetClick()
-                            } else if (isFinished) {
-                                onResetClick()
+                        if (up != null && !holdCompleted) {
+                            if (isFinished) {
+                                onResetClick() // Single tap restarts when finished
                             }
                         }
                     }
@@ -304,11 +286,11 @@ fun AnimalCadran(
                 .testTag("center_knob_interaction"),
             contentAlignment = Alignment.Center
         ) {
-            // Visual circle ring when holding for 3 seconds
+            // Visual circle ring when holding for 3 seconds to reset
             if (holdProgress > 0.04f) {
                 Canvas(modifier = Modifier.fillMaxSize().padding(2.dp)) {
                     drawArc(
-                        color = PastelTurquoise,
+                        color = themeColor.primaryColor,
                         startAngle = -90f,
                         sweepAngle = holdProgress * 360f,
                         useCenter = false,
@@ -324,8 +306,8 @@ fun AnimalCadran(
                         .fillMaxSize()
                         .scale(celebrationScale)
                         .clip(CircleShape)
-                        .background(PastelTurquoiseLight)
-                        .border(2.5.dp, PastelTurquoise, CircleShape)
+                        .background(themeColor.lightColor)
+                        .border(2.5.dp, themeColor.primaryColor, CircleShape)
                         .padding(6.dp),
                     contentAlignment = Alignment.Center
                 ) {
@@ -340,7 +322,7 @@ fun AnimalCadran(
                             .align(Alignment.BottomEnd)
                             .size(24.dp)
                             .clip(CircleShape)
-                            .background(PastelTurquoise),
+                            .background(themeColor.primaryColor),
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
@@ -354,28 +336,7 @@ fun AnimalCadran(
             }
         }
 
-        // Floating toast badge feedback when sound is toggled via 3-second hold
-        soundFeedbackMessage?.let { msg ->
-            Box(
-                modifier = Modifier
-                    .offset(y = with(density) { (-knobRadiusPx * 2.2f).toDp() })
-                    .clip(RoundedCornerShape(16.dp))
-                    .background(Color(0xFF222629).copy(alpha = 0.94f))
-                    .border(1.5.dp, PastelTurquoise.copy(alpha = 0.6f), RoundedCornerShape(16.dp))
-                    .padding(horizontal = 14.dp, vertical = 6.dp)
-                    .testTag("sound_toggle_feedback"),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = msg,
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.White
-                )
-            }
-        }
-
-        // 12 Animals placed regularly around the dial (Ours at 1h, ..., Lion at 12h)
+        // 12 Items placed regularly around the dial (Ours/5 at 1h, ..., Lion/60 at 12h)
         CadranAnimals.list.forEach { animal ->
             val isSelected = (selectedMinutes == animal.minutes)
             val isSelectionInteractive = !isRunning && !isFinished
@@ -388,32 +349,32 @@ fun AnimalCadran(
             val animalOffsetX = with(density) { (animalCenterXPx - diameterPx / 2f).toDp() }
             val animalOffsetY = with(density) { (animalOffsetYPx - diameterPx / 2f).toDp() }
 
-            val animalScale by animateFloatAsState(
+            val itemScale by animateFloatAsState(
                 targetValue = when {
                     isSelected && !isRunning -> 1.18f
                     isSelected && isRunning -> 1.08f
                     else -> 1.0f
                 },
                 animationSpec = spring(dampingRatio = 0.65f, stiffness = 500f),
-                label = "animal_scale_${animal.position}"
+                label = "item_scale_${animal.position}"
             )
 
             Box(
                 modifier = Modifier
                     .offset(x = animalOffsetX, y = animalOffsetY)
                     .size(animalSizeDp)
-                    .scale(animalScale)
-                    .testTag("animal_button_${animal.position}"),
+                    .scale(itemScale)
+                    .testTag("item_button_${animal.position}"),
                 contentAlignment = Alignment.Center
             ) {
-                // If selected: gentle glowing soft circular halo
+                // If selected: gentle glowing soft circular halo in theme color
                 if (isSelected) {
                     Box(
                         modifier = Modifier
                             .fillMaxSize(1.15f)
                             .clip(CircleShape)
-                            .background(PastelTurquoiseLight.copy(alpha = 0.85f))
-                            .border(2.dp, PastelTurquoise, CircleShape)
+                            .background(themeColor.lightColor.copy(alpha = 0.85f))
+                            .border(2.dp, themeColor.primaryColor, CircleShape)
                     )
                 }
 
@@ -431,12 +392,38 @@ fun AnimalCadran(
                         .padding(4.dp),
                     contentAlignment = Alignment.Center
                 ) {
-                    Image(
-                        painter = painterResource(id = animal.drawableRes),
-                        contentDescription = animal.name,
-                        contentScale = ContentScale.Fit,
-                        modifier = Modifier.fillMaxSize()
-                    )
+                    if (displayMode == CadranDisplayMode.ANIMALS) {
+                        Image(
+                            painter = painterResource(id = animal.drawableRes),
+                            contentDescription = animal.name,
+                            contentScale = ContentScale.Fit,
+                            modifier = Modifier.fillMaxSize()
+                        )
+                    } else {
+                        // Display numbers: 5, 10, 15, ..., 60 in warm, clear rounded badges
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize(0.92f)
+                                .clip(CircleShape)
+                                .background(
+                                    if (isSelected) themeColor.primaryColor
+                                    else Color(0xFFF7F2EA)
+                                )
+                                .border(
+                                    width = if (isSelected) 2.dp else 1.dp,
+                                    color = if (isSelected) themeColor.darkColor else DialBorderColor,
+                                    shape = CircleShape
+                                ),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = "${animal.minutes}",
+                                fontSize = if (animal.minutes >= 10) 18.sp else 20.sp,
+                                fontWeight = FontWeight.ExtraBold,
+                                color = if (isSelected) Color.White else SoftCharcoal
+                            )
+                        }
+                    }
                 }
             }
         }

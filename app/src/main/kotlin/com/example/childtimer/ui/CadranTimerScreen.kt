@@ -20,10 +20,6 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
@@ -34,18 +30,12 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -62,24 +52,20 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.childtimer.data.DefaultChildTimerPreferencesRepository
 import com.example.childtimer.model.CadranAnimal
+import com.example.childtimer.model.CadranDisplayMode
+import com.example.childtimer.model.TimerThemeColor
 import com.example.childtimer.sound.SoftSoundPlayer
 import com.example.childtimer.ui.cadran.AnimalCadran
-import com.example.childtimer.ui.theme.CreamBackground
-import com.example.childtimer.ui.theme.PastelTurquoise
-import com.example.childtimer.ui.theme.PastelTurquoiseDark
-import com.example.childtimer.ui.theme.PastelTurquoiseLight
-import com.example.childtimer.ui.theme.PastelTurquoiseSoft
+import com.example.childtimer.ui.components.ParentSettingsSheet
 import com.example.childtimer.ui.theme.WarmWhite
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
-import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
-import kotlin.random.Random
 
 enum class CadranTimerPhase {
     SELECTING_DURATION,
@@ -94,14 +80,23 @@ fun CadranTimerScreen(
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val soundPlayer = remember { SoftSoundPlayer(context) }
+    val preferencesRepository = remember { DefaultChildTimerPreferencesRepository(context) }
+
+    val displayMode by preferencesRepository.displayMode.collectAsStateWithLifecycle()
+    val themeColor by preferencesRepository.themeColor.collectAsStateWithLifecycle()
+    val isSoundEnabled by preferencesRepository.isSoundEnabled.collectAsStateWithLifecycle()
 
     var phase by remember { mutableStateOf(CadranTimerPhase.SELECTING_DURATION) }
     var selectedMinutes by remember { mutableStateOf<Int?>(null) }
     var timerStartTimeMs by remember { mutableLongStateOf(0L) }
     var timerTotalDurationMs by remember { mutableLongStateOf(0L) }
     var remainingRatio by remember { mutableFloatStateOf(1f) }
-    var isMuted by remember { mutableStateOf(false) }
-    var soundFeedbackMessage by remember { mutableStateOf<String?>(null) }
+    var isSettingsOpen by remember { mutableStateOf(false) }
+
+    // Sync sound player mute state with repository preference
+    LaunchedEffect(isSoundEnabled) {
+        soundPlayer.setMuted(!isSoundEnabled)
+    }
 
     // Accurate real-time timer calculation loop using system clock reference
     LaunchedEffect(phase, timerStartTimeMs, timerTotalDurationMs) {
@@ -157,7 +152,7 @@ fun CadranTimerScreen(
         val heightPx = with(density) { maxHeight.toPx() }
 
         // Horizontal center position of the cadran:
-        // Left position (~33% of width) when selecting, exact center (50% of width) when running or finished
+        // Left position (~35% of width) when selecting, exact center (50% of width) when running or finished
         val targetCadranCenterRatio = when (phase) {
             CadranTimerPhase.SELECTING_DURATION -> 0.35f
             CadranTimerPhase.RUNNING, CadranTimerPhase.FINISHED -> 0.50f
@@ -169,7 +164,7 @@ fun CadranTimerScreen(
             label = "cadran_horizontal_center"
         )
 
-        // Cadran diameter (ensuring comfortable room for 12 animals and clean margins)
+        // Cadran diameter (ensuring comfortable room for 12 items and clean margins)
         val cadranDiameterDp = minOf(maxHeight * 0.94f, maxWidth * 0.58f)
         val cadranDiameterPx = with(density) { cadranDiameterDp.toPx() }
 
@@ -182,9 +177,9 @@ fun CadranTimerScreen(
         if (phase == CadranTimerPhase.FINISHED) {
             Canvas(modifier = Modifier.fillMaxSize()) {
                 val starColors = listOf(
-                    PastelTurquoise.copy(alpha = 0.45f),
-                    Color(0xFFFFD54F).copy(alpha = 0.5f),
-                    Color(0xFFFF8A65).copy(alpha = 0.45f)
+                    themeColor.primaryColor.copy(alpha = 0.5f),
+                    themeColor.softColor.copy(alpha = 0.6f),
+                    Color(0xFFFFD54F).copy(alpha = 0.5f)
                 )
                 val baseAngles = listOf(20f, 75f, 140f, 195f, 260f, 320f)
                 baseAngles.forEachIndexed { idx, deg ->
@@ -217,11 +212,11 @@ fun CadranTimerScreen(
                 remainingRatio = if (phase == CadranTimerPhase.RUNNING) remainingRatio else 1f,
                 isRunning = (phase == CadranTimerPhase.RUNNING),
                 isFinished = (phase == CadranTimerPhase.FINISHED),
-                isMuted = isMuted,
-                soundFeedbackMessage = soundFeedbackMessage,
-                onSelectAnimal = { animal ->
+                displayMode = displayMode,
+                themeColor = themeColor,
+                onSelectAnimal = { item ->
                     if (phase == CadranTimerPhase.SELECTING_DURATION) {
-                        selectedMinutes = animal.minutes
+                        selectedMinutes = item.minutes
                         soundPlayer.playAnimalTap(scope)
                     }
                 },
@@ -230,16 +225,6 @@ fun CadranTimerScreen(
                     phase = CadranTimerPhase.SELECTING_DURATION
                     selectedMinutes = null
                     remainingRatio = 1f
-                },
-                onToggleSound = {
-                    isMuted = !isMuted
-                    soundPlayer.setMuted(isMuted)
-                    soundPlayer.playToggleSoundFeedback(!isMuted, scope)
-                    soundFeedbackMessage = if (isMuted) "Son coupé 🔕" else "Son activé 🔔"
-                    scope.launch {
-                        delay(1600)
-                        soundFeedbackMessage = null
-                    }
                 },
                 modifier = Modifier.fillMaxSize()
             )
@@ -266,11 +251,11 @@ fun CadranTimerScreen(
                 modifier = Modifier
                     .size(playButtonSizeDp)
                     .scale(playPulseScale)
-                    .shadow(elevation = 12.dp, shape = CircleShape, spotColor = PastelTurquoiseDark.copy(alpha = 0.4f))
+                    .shadow(elevation = 12.dp, shape = CircleShape, spotColor = themeColor.darkColor.copy(alpha = 0.45f))
                     .clip(CircleShape)
                     .background(
                         Brush.linearGradient(
-                            colors = listOf(PastelTurquoiseSoft, PastelTurquoise)
+                            colors = listOf(themeColor.softColor, themeColor.primaryColor)
                         )
                     )
                     .border(3.dp, WarmWhite, CircleShape)
@@ -293,5 +278,52 @@ fun CadranTimerScreen(
                 )
             }
         }
+
+        // 4. Semicircle handle on the right edge without icon (only visible in SELECTING_DURATION)
+        AnimatedVisibility(
+            visible = (phase == CadranTimerPhase.SELECTING_DURATION),
+            enter = fadeIn(tween(300)),
+            exit = fadeOut(tween(200)),
+            modifier = Modifier.align(Alignment.CenterEnd)
+        ) {
+            val handleRadius = 28.dp
+            val semicircleShape = RoundedCornerShape(
+                topStart = handleRadius,
+                bottomStart = handleRadius,
+                topEnd = 0.dp,
+                bottomEnd = 0.dp
+            )
+
+            Box(
+                modifier = Modifier
+                    .size(width = handleRadius, height = handleRadius * 2)
+                    .clip(semicircleShape)
+                    .background(Color(0xFF1E2226).copy(alpha = 0.92f))
+                    .border(1.dp, Color(0xFF38404A), semicircleShape)
+                    .clickable { isSettingsOpen = true }
+                    .testTag("open_settings_handle"),
+                contentAlignment = Alignment.Center
+            ) {
+                // Subtle tactile grip bar inside the semicircle
+                Box(
+                    modifier = Modifier
+                        .size(width = 3.dp, height = 18.dp)
+                        .clip(RoundedCornerShape(1.5.dp))
+                        .background(themeColor.primaryColor.copy(alpha = 0.75f))
+                )
+            }
+        }
+
+        // 5. Parent Settings & Help Drawer Panel
+        ParentSettingsSheet(
+            isOpen = isSettingsOpen,
+            displayMode = displayMode,
+            themeColor = themeColor,
+            isSoundEnabled = isSoundEnabled,
+            onDisplayModeChange = { preferencesRepository.setDisplayMode(it) },
+            onThemeColorChange = { preferencesRepository.setThemeColor(it) },
+            onSoundToggle = { preferencesRepository.setSoundEnabled(it) },
+            onDismiss = { isSettingsOpen = false }
+        )
     }
 }

@@ -1,7 +1,7 @@
 <div align="center">
   <h1><img src="app/src/main/res/drawable/ic_app_fox.png" alt="" width="48" valign="middle"> Child Timer</h1>
   <p><strong>Le temps devient visible, simplement.</strong></p>
-  <p>Un minuteur visuel Android conçu pour aider les enfants à comprendre le temps qui passe, sans chiffres au cadran ni compte à rebours numérique.</p>
+  <p>Un minuteur visuel Android doux, ludique et épuré, conçu pour aider les enfants à appréhender le temps qui passe grâce à un disque coloré, des animaux attachants ou des chiffres clairs.</p>
   <p>
     <img src="https://img.shields.io/badge/Plateforme-Android-3DDC84?logo=android&logoColor=white" alt="Android">
     <img src="https://img.shields.io/badge/Minimum-Android%207.0%2B-4285F4" alt="Android 7.0 minimum">
@@ -11,7 +11,8 @@
 </div>
 
 <p align="center">
-  <img src="docs/screenshots/main-screen.png" alt="Child Timer en mode paysage : cadran circulaire et animaux pour choisir une durée" width="900">
+  <img src="docs/screenshots/main-screen.png" alt="Child Timer : cadran circulaire en mode paysage" width="48%">
+  <img src="docs/screenshots/settings-menu.png" alt="Volet latéral Réglages et Aide pour les parents" width="48%">
 </p>
 
 <p align="center">
@@ -20,158 +21,149 @@
 
 ## 🧸 À propos
 
-**Child Timer** est une application Android minimaliste qui représente une durée sous la forme d'un secteur coloré sur un cadran. L'enfant choisit l'un des animaux placés autour du cadran, puis lance le timer. Le secteur turquoise se réduit progressivement jusqu'à la fin du temps choisi.
+**Child Timer** est une application Android minimaliste inspirée des minuteurs visuels mécaniques analogiques pour enfants. Elle matérialise une durée sous la forme d'un secteur circulaire coloré qui diminue progressivement dans le sens inverse des aiguilles d'une montre jusqu'à disparaître.
 
-L'interface est volontairement immersive : elle fonctionne en **paysage**, masque les barres système Android et maintient l'écran éveillé pendant l'utilisation.
+L'interface est pensée pour les tout-petits et les familles :
+- **Immersion totale en paysage** : les barres système Android sont masquées et l'écran reste allumé pendant toute la durée du décompte.
+- **Zéro distraction pendant le timer** : aucun bouton, chiffre numérique ni menu n'est affiché pendant le décompte pour favoriser le calme et la concentration.
+- **Accès parent discret** : un volet latéral coulissant permet d'ajuster les préférences à l'arrêt, et se verrouille automatiquement dès que le timer démarre.
+
+---
 
 ## ✨ Fonctionnalités
 
-- **12 animaux illustrés** disposés autour du cadran.
-- **Durées de 5 à 60 minutes**, par pas de 5 minutes : un animal correspond à une durée.
-- **Cadran sans chiffres** et sans affichage numérique du temps restant.
-- **Secteur turquoise animé** qui matérialise le temps disponible puis diminue pendant le décompte.
-- **Bouton Lecture** qui apparaît après le choix d'un animal.
-- **Retour sonore doux** lors de la sélection et du démarrage, puis une mélodie à la fin.
-- **Vibrations discrètes** pour accompagner certaines interactions.
-- **Petite célébration visuelle** à la fin du timer, avec des étoiles et un renard au centre.
-- **Plein écran paysage** pour que le cadran reste au centre de l'expérience.
+- **2 styles de cadran au choix :**
+  - 🦁 **Mode Animaux** : 12 animaux illustrés chaleureux pour guider les plus jeunes sans notion de lecture de chiffres.
+  - 🔢 **Mode Chiffres** : repères des minutes de 5 en 5 (**5, 10, 15... 60**) dans de douces pastilles rondes adaptées aux enfants qui apprennent à lire l'heure.
+- **Durées de 5 à 60 minutes**, par pas de 5 minutes (chaque position correspond à un animal ou un multiple de 5 minutes).
+- **Palette de 6 teintes pastel douces :**
+  - 🌊 *Turquoise doux* (frais et apaisant)
+  - 🍎 *Corail Time Timer* (la couleur classique et iconique des minuteurs mécaniques)
+  - ☁️ *Bleu Ciel* (calme et reposant)
+  - 🍃 *Vert Menthe* (tendre et naturel)
+  - 🪻 *Lavande / Lilas* (doux et poétique)
+  - 🍑 *Pêche Dorée* (chaleureux et joyeux)
+- **Volet latéral « Réglages & Aide » :** accessible à l'arrêt via une discrète poignée en demi-cercle sur le bord droit, avec indicateur de défilement pour consulter les astuces d'utilisation.
+- **Disque visuel animé :** se remplit immédiatement dans le sens horaire au toucher d'une durée, puis se rétracte doucement en temps réel (basé sur l'horloge système `System.currentTimeMillis()`).
+- **Bouton Lecture ludique :** apparaît à droite dès qu'une durée est choisie, avec pulsation invitant au toucher. Au lancement, le cadran glisse doucement pour venir se centrer sur l'écran.
+- **Sons doux et chaleureux :** clics marimba graves lors du toucher, carillon d'alarme à la fin du timer, audibles même si le téléphone est en mode *Ne pas déranger* (DND).
+- **Mode silencieux :** désactivation complète des sons en un clic depuis le volet parent.
+- **Vibrations haptiques :** légères vibrations pour confirmer le toucher et la fin du temps.
+- **Célébration positive :** pluie d'étoiles scintillantes et mascotte du renard au centre du cadran lorsque le temps est écoulé.
 
-### Les animaux et leurs durées
+---
 
-| Position du cadran | Animal | Durée |
-|---|---|---:|
-| 1 h | <img src="app/src/main/res/drawable/ours.png" alt="Ours" width="42"> Ours | 5 min |
-| 2 h | <img src="app/src/main/res/drawable/hibou.png" alt="Hibou" width="42"> Hibou | 10 min |
-| 3 h | <img src="app/src/main/res/drawable/lapin.png" alt="Lapin" width="42"> Lapin | 15 min |
-| 4 h | <img src="app/src/main/res/drawable/renard.png" alt="Renard" width="42"> Renard | 20 min |
-| 5 h | <img src="app/src/main/res/drawable/croco.png" alt="Croco" width="42"> Croco | 25 min |
-| 6 h | <img src="app/src/main/res/drawable/zebre.png" alt="Zèbre" width="42"> Zèbre | 30 min |
-| 7 h | <img src="app/src/main/res/drawable/singe.png" alt="Singe" width="42"> Singe | 35 min |
-| 8 h | <img src="app/src/main/res/drawable/elephant.png" alt="Éléphant" width="42"> Éléphant | 40 min |
-| 9 h | <img src="app/src/main/res/drawable/girafe.png" alt="Girafe" width="42"> Girafe | 45 min |
-| 10 h | <img src="app/src/main/res/drawable/ecureuil.png" alt="Écureuil" width="42"> Écureuil | 50 min |
-| 11 h | <img src="app/src/main/res/drawable/panda.png" alt="Panda" width="42"> Panda | 55 min |
-| 12 h | <img src="app/src/main/res/drawable/lion.png" alt="Lion" width="42"> Lion | 60 min |
+### 🦁 Les 12 animaux et leurs durées
 
+| Position | Animal | Repère chiffré | Durée |
+|---|---|:---:|---:|
+| 1 h | <img src="app/src/main/res/drawable/ours.png" alt="Ours" width="38"> Ours | **5** | 5 min |
+| 2 h | <img src="app/src/main/res/drawable/hibou.png" alt="Hibou" width="38"> Hibou | **10** | 10 min |
+| 3 h | <img src="app/src/main/res/drawable/lapin.png" alt="Lapin" width="38"> Lapin | **15** | 15 min (un quart) |
+| 4 h | <img src="app/src/main/res/drawable/renard.png" alt="Renard" width="38"> Renard | **20** | 20 min |
+| 5 h | <img src="app/src/main/res/drawable/croco.png" alt="Croco" width="38"> Croco | **25** | 25 min |
+| 6 h | <img src="app/src/main/res/drawable/zebre.png" alt="Zèbre" width="38"> Zèbre | **30** | 30 min (la moitié) |
+| 7 h | <img src="app/src/main/res/drawable/singe.png" alt="Singe" width="38"> Singe | **35** | 35 min |
+| 8 h | <img src="app/src/main/res/drawable/elephant.png" alt="Éléphant" width="38"> Éléphant | **40** | 40 min |
+| 9 h | <img src="app/src/main/res/drawable/girafe.png" alt="Girafe" width="38"> Girafe | **45** | 45 min (trois quarts) |
+| 10 h | <img src="app/src/main/res/drawable/ecureuil.png" alt="Écureuil" width="38"> Écureuil | **50** | 50 min |
+| 11 h | <img src="app/src/main/res/drawable/panda.png" alt="Panda" width="38"> Panda | **55** | 55 min |
+| 12 h | <img src="app/src/main/res/drawable/lion.png" alt="Lion" width="38"> Lion | **60** | 60 min (tour complet) |
+
+---
 
 ## ▶️ Utilisation
 
-1. Ouvre l'application en mode paysage.
-2. Touche l'animal correspondant à la durée souhaitée. Le secteur turquoise montre la durée sélectionnée.
-3. Appuie sur le gros bouton **Lecture** qui apparaît à droite.
-4. Laisse l'enfant observer le secteur diminuer. À la fin, une animation, un son et une vibration signalent que le temps est écoulé.
+1. **Choisir la durée** : Touche l'animal (ou le chiffre) souhaité. Le disque se colore instantanément jusqu'à cette position.
+2. **Lancer le minuteur** : Appuie sur le gros bouton **Lecture** qui apparaît à droite.
+3. **Pendant le décompte** : Le cadran se centre. Le disque se rétracte progressivement vers le haut (midi). Les interactions tactiles sur le cadran sont verrouillées pour éviter les fausses manipulations.
+4. **Fin du timer** : Lorsque le disque disparaît, une douce mélodie retentit avec des étoiles scintillantes.
 
-### Commandes disponibles
+### 🕹️ Commandes et gestes pour les parents
 
-- **Activer ou couper le son :** maintenir le petit moyeu au centre du cadran pendant environ 3 secondes.
-- **Réinitialiser avant la fin :** toucher rapidement le moyeu central 10 fois.
-- **Revenir au choix de durée après la fin :** toucher le renard au centre.
+- **Ouvrir les réglages :** Touche la petite poignée en demi-cercle sur le bord droit de l'écran (uniquement disponible à l'arrêt).
+- **Réinitialiser pendant le décompte :** Maintiens appuyé le bouton au centre du cadran pendant **3 secondes**. Un anneau de progression circulaire visible accompagne le maintien, puis réinitialise le timer avec une vibration de confirmation.
+- **Relancer après la fin du timer :** Touche simplement le renard au centre du cadran pour revenir à l'écran initial.
+- **Couper ou activer le son :** Utilise l'interrupteur dédié dans le volet Réglages.
 
-> Le contrôle du son et la réinitialisation reposent actuellement sur des gestes cachés, plutôt que sur des boutons visibles.
+> 🔒 **Sécurité enfant :** Le volet latéral et sa poignée sont automatiquement désactivés et invisibles pendant toute la durée du compte à rebours.
+
+---
 
 ## 📱 Compatibilité
 
 - Android **7.0 (API 24) ou supérieur**.
-- Interface prévue pour le **paysage**.
-- SDK Android ciblé : **36**.
+- Interface conçue exclusivement pour l'orientation **paysage**.
+- SDK Android ciblé : **36** (Android 16).
+
+---
 
 ## 🛠️ Technologies
 
 - **Kotlin**
-- **Jetpack Compose** et Material 3
-- **Android Gradle Plugin 9.0.1**
-- **Gradle 9.1.0**
+- **Jetpack Compose** & Material Design 3
+- **Android Gradle Plugin 9.0.1** & **Gradle 9.1.0**
 - **JDK 17**
-- Sons synthétisés localement via <code>AudioTrack</code> et retour haptique via les API Android.
+- Synthèse sonore acoustique via `AudioTrack` (`AudioAttributes.USAGE_ALARM` pour traverser le mode silencieux/DND) et retour haptique Android.
+
+---
 
 ## 🔧 Construire l'application
 
 ### Prérequis
-
 Installe un JDK 17 et le SDK Android avec la plateforme Android API 36.
 
 ### Compiler et tester
-
 Sur Linux ou macOS :
-
-~~~bash
+```bash
 ./gradlew testDebugUnitTest assembleDebug
-~~~
-
+```
 Sur Windows :
-
-~~~bat
+```bat
 gradlew.bat testDebugUnitTest assembleDebug
-~~~
+```
 
-L'APK de débogage est généré dans :
-
-~~~text
+L'APK de débogage est produit dans :
+```text
 app/build/outputs/apk/debug/app-debug.apk
-~~~
+```
+*(Une copie prête à l'emploi est également placée directement à la racine du dépôt : `ChildTimer.apk`)*.
 
-Pour produire la variante release non signée localement :
-
-~~~bash
-./gradlew assembleRelease
-~~~
-
-La variante release n'est pas installable tant qu'elle n'a pas été signée. La procédure de publication automatique est décrite ci-dessous.
+---
 
 ## 📦 Publier une release APK
 
-Le workflow GitHub Actions <code>.github/workflows/release-apk.yml</code> est conçu pour construire, signer et joindre l'APK à une **GitHub Release** lorsqu'un tag <code>v*</code> est poussé. Il nécessite une clé de signature privée, à conserver hors du dépôt.
+Le workflow GitHub Actions `.github/workflows/release-apk.yml` est conçu pour construire, signer et joindre automatiquement l'APK à une **GitHub Release** lorsqu'un tag `v*` est poussé.
 
 ### 1. Créer une clé de signature
-
-Sur ta machine, exécute :
-
-~~~bash
+Sur ta machine :
+```bash
 keytool -genkeypair -v -keystore child-timer-release.jks -alias child-timer -keyalg RSA -keysize 2048 -validity 10000
-~~~
-
-**Conserve précieusement ce fichier et ses mots de passe. Ne commite jamais la clé dans Git.** La même clé doit être réutilisée pour les prochaines versions afin de permettre les mises à jour de l'application.
+```
+*Conserve précieusement ce fichier et ses mots de passe hors du dépôt Git.*
 
 ### 2. Ajouter les secrets GitHub
-
-Dans **Settings → Secrets and variables → Actions**, crée les secrets suivants :
-
-- <code>ANDROID_KEYSTORE_BASE64</code> : contenu Base64 du fichier <code>.jks</code>.
-- <code>ANDROID_KEY_ALIAS</code> : alias utilisé à la création de la clé (ici <code>child-timer</code>).
-- <code>ANDROID_KEYSTORE_PASSWORD</code> : mot de passe du keystore.
-- <code>ANDROID_KEY_PASSWORD</code> : mot de passe de la clé.
-
-Sous Windows PowerShell, cette commande copie le contenu Base64 du keystore dans le presse-papiers :
-
-~~~powershell
-[Convert]::ToBase64String([IO.File]::ReadAllBytes(".\child-timer-release.jks")) | Set-Clipboard
-~~~
-
-Colle cette valeur uniquement dans le secret GitHub correspondant, jamais dans un fichier du dépôt.
+Dans **Settings → Secrets and variables → Actions**, crée les 4 secrets suivants :
+- `ANDROID_KEYSTORE_BASE64` : contenu Base64 du fichier `.jks`.
+- `ANDROID_KEY_ALIAS` : alias de la clé (`child-timer`).
+- `ANDROID_KEYSTORE_PASSWORD` : mot de passe du keystore.
+- `ANDROID_KEY_PASSWORD` : mot de passe de la clé.
 
 ### 3. Déclencher la publication
-
-La version actuelle du projet indique <code>versionName = "1.0"</code>. Après avoir vérifié la version et la configuration, crée puis pousse le tag correspondant :
-
-~~~bash
+```bash
 git tag v1.0
 git push origin v1.0
-~~~
+```
+Le workflow compile l'APK release, le signe, vérifie sa signature et crée la release GitHub avec l'APK joint.
 
-Le workflow construit un APK release, le signe, vérifie sa signature puis crée une release avec l'APK en pièce jointe. Les prochaines versions devront augmenter <code>versionCode</code> et mettre à jour <code>versionName</code> dans <code>app/build.gradle.kts</code> avant de pousser leur tag.
-
-**Avant la toute première release publique**, vérifie également que l'identifiant Android <code>applicationId = "com.aistudio.childtimer.kxrqzp"</code> est bien celui que tu souhaites conserver. Le changer après la publication empêcherait l'APK suivant d'être reconnu comme une mise à jour de cette application.
-
-Pour installer rapidement la build de test, utilise le lien de téléchargement en haut du README. Les versions de production signées seront disponibles dans les [GitHub Releases](https://github.com/aciderix/Child-timer/releases) une fois la clé de signature configurée.
+---
 
 ## 🔒 Confidentialité
 
-Le manifeste Android ne déclare pas de permission réseau ; il déclare uniquement la permission de vibration. Les sons du timer sont synthétisés localement. L'application n'a pas besoin de compte utilisateur pour son fonctionnement actuel.
+L'application ne collecte aucune donnée, ne requiert aucun compte, ne contient aucune publicité et ne demande aucune permission superflue (aucune permission Internet). Tous les sons sont synthétisés localement sur l'appareil.
 
-## 🧭 Périmètre actuel
-
-Cette version est centrée sur le cadran animalier. Elle ne propose pas encore de compte à rebours chiffré, de pause/reprise, de préréglages de routines, de durée personnalisée ou d'historique. Le README décrit volontairement le fonctionnement de l'écran réellement lancé par l'application, et non les anciennes interfaces présentes dans le code source.
+---
 
 ## 📄 Licence
 
-Aucun fichier de licence n'est actuellement fourni dans le dépôt. Les conditions de réutilisation et de redistribution restent donc à définir.
+Projet personnel open-source — conditions de réutilisation et de redistribution à définir par l'auteur.
