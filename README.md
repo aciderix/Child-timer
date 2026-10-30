@@ -1,7 +1,7 @@
 <div align="center">
   <h1><img src="app/src/main/res/drawable/ic_app_fox.png" alt="" width="48" valign="middle"> Child Timer</h1>
   <p><strong>Le temps devient visible, simplement.</strong></p>
-  <p>Un minuteur visuel Android doux, ludique et épuré, conçu pour aider les enfants à appréhender le temps qui passe grâce à un disque coloré, des animaux attachants ou des chiffres clairs.</p>
+  <p>Un minuteur visuel doux, ludique et épuré, disponible en application Android native et en version Web installable (PWA), pour aider les enfants à appréhender le temps qui passe grâce à un disque coloré, des animaux attachants ou des chiffres clairs.</p>
   <p>
     <img src="https://img.shields.io/badge/Plateforme-Android-3DDC84?logo=android&logoColor=white" alt="Android">
     <img src="https://img.shields.io/badge/Minimum-Android%207.0%2B-4285F4" alt="Android 7.0 minimum">
@@ -18,12 +18,12 @@
 <p align="center">
   <a href="https://github.com/aciderix/Child-timer/raw/refs/heads/main/ChildTimer.apk"><strong>⬇️ Télécharger l’APK Android</strong></a>
   &nbsp;&nbsp;•&nbsp;&nbsp;
-  <a href="https://aciderix.github.io/Child-timer/pwa/"><strong>🍏 Lancer sur iPhone / iPad / Web (PWA)</strong></a>
+  <a href="https://aciderix.github.io/Child-timer/pwa/"><strong>📲 Version PWA · Android / iOS / Web</strong></a>
 </p>
 
 ## 🧸 À propos
 
-**Child Timer** est une application Android minimaliste inspirée des minuteurs visuels mécaniques analogiques pour enfants. Elle matérialise une durée sous la forme d'un secteur circulaire coloré qui diminue progressivement dans le sens inverse des aiguilles d'une montre jusqu'à disparaître.
+**Child Timer** existe en deux versions complémentaires : une application Android native et une **Progressive Web App (PWA)** accessible depuis un navigateur sur Android, iPhone, iPad et ordinateur. Inspirée des minuteurs visuels mécaniques analogiques pour enfants, elle matérialise une durée sous la forme d'un secteur circulaire coloré qui diminue progressivement dans le sens inverse des aiguilles d'une montre jusqu'à disparaître.
 
 L'interface est pensée pour les tout-petits et les familles :
 - **Immersion totale en paysage** : les barres système Android sont masquées et l'écran reste allumé pendant toute la durée du décompte.
@@ -133,13 +133,38 @@ app/build/outputs/apk/debug/app-debug.apk
 
 ---
 
-## 🍏 Version iOS / Web (PWA) via GitHub Pages
+## 📲 Version Web installable (PWA)
 
-Pour utiliser l'application sur **iPhone, iPad ou navigateur** sans compte Apple Développeur :
-1. Active **GitHub Pages** dans ton dépôt : **Settings → Pages → Source : Deploy from a branch** (branche `main`, dossier `/docs`).
-2. Ouvre l'URL : `https://<pseudo>.github.io/Child-timer/pwa/` sur Safari (iPhone / iPad).
-3. Appuie sur le bouton **Partager** (le carré avec la flèche vers le haut), puis choisis **« Sur l'écran d'accueil »**.
-4. L'application s'installe directement sur l'écran d'accueil de l'iPhone avec son icône de renard, fonctionne en plein écran et est accessible hors-ligne.
+En complément de l'application Android native téléchargeable en APK, **Child Timer est aussi disponible en version Web installable**. Cette PWA fonctionne depuis un navigateur moderne sur Android, iPhone, iPad et ordinateur, sans passer par le Play Store ou l'App Store.
+
+<p align="center">
+  <a href="https://aciderix.github.io/Child-timer/pwa/"><strong>🚀 Ouvrir Child Timer – Version PWA</strong></a>
+</p>
+
+### Installer sur Android
+
+1. Ouvre [Child Timer – Version PWA](https://aciderix.github.io/Child-timer/pwa/) dans **Google Chrome** sur ton téléphone ou ta tablette Android.
+2. Appuie sur le menu **⋮** en haut à droite.
+3. Choisis **« Installer l'application »**. Selon la version de Chrome, l'option peut s'appeler **« Installer et créer un raccourci »** ou **« Ajouter à l'écran d'accueil »**.
+4. Confirme avec **« Installer »** ou **« Ajouter »**.
+
+L'icône Child Timer apparaît alors sur l'écran d'accueil et dans le lanceur d'applications. Elle permet d'ouvrir le minuteur dans une fenêtre dédiée, comme une application.
+
+### Installer sur iPhone ou iPad
+
+1. Ouvre [Child Timer – Version PWA](https://aciderix.github.io/Child-timer/pwa/) dans **Safari**.
+2. Appuie sur le bouton **Partager** (le carré avec la flèche vers le haut).
+3. Fais défiler les actions et sélectionne **« Sur l'écran d'accueil »** ou **« Ajouter à l'écran d'accueil »**.
+4. Lorsque l'option **« Ouvrir comme app web »** est proposée, laisse-la activée.
+5. Appuie sur **« Ajouter »**.
+
+L'icône Child Timer est maintenant disponible sur l'écran d'accueil. En la lançant, la PWA s'ouvre comme une application, sans la barre d'adresse de Safari.
+
+### Utilisation hors connexion
+
+La PWA intègre un **service worker** qui met en cache l'interface, les icônes et les illustrations des animaux. Ouvre-la une première fois avec une connexion Internet et laisse le chargement se terminer : les ressources mises en cache resteront ensuite accessibles hors connexion.
+
+> La version PWA et l'application Android native sont deux distributions du même projet. La PWA ne nécessite aucune installation depuis un store : elle s'ajoute directement à l'écran d'accueil depuis le navigateur.
 
 ---
 
