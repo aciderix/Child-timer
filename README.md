@@ -17,6 +17,8 @@
 
 <p align="center">
   <a href="https://github.com/aciderix/Child-timer/raw/refs/heads/main/ChildTimer.apk"><strong>⬇️ Télécharger l’APK Android</strong></a>
+  &nbsp;&nbsp;•&nbsp;&nbsp;
+  <a href="https://aciderix.github.io/Child-timer/pwa/"><strong>🍏 Lancer sur iPhone / iPad / Web (PWA)</strong></a>
 </p>
 
 ## 🧸 À propos
@@ -128,6 +130,16 @@ L'APK de débogage est produit dans :
 app/build/outputs/apk/debug/app-debug.apk
 ```
 *(Une copie prête à l'emploi est également placée directement à la racine du dépôt : `ChildTimer.apk`)*.
+
+---
+
+## 🍏 Version iOS / Web (PWA) via GitHub Pages
+
+Pour utiliser l'application sur **iPhone, iPad ou navigateur** sans compte Apple Développeur :
+1. Active **GitHub Pages** dans ton dépôt : **Settings → Pages → Source : Deploy from a branch** (branche `main`, dossier `/docs`).
+2. Ouvre l'URL : `https://<pseudo>.github.io/Child-timer/pwa/` sur Safari (iPhone / iPad).
+3. Appuie sur le bouton **Partager** (le carré avec la flèche vers le haut), puis choisis **« Sur l'écran d'accueil »**.
+4. L'application s'installe directement sur l'écran d'accueil de l'iPhone avec son icône de renard, fonctionne en plein écran et est accessible hors-ligne.
 
 ---
 

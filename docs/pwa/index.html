@@ -1,0 +1,979 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Child Timer</title>
+  
+  <!-- PWA & Apple Web App meta tags -->
+  <link rel="manifest" href="./manifest.json">
+  <meta name="theme-color" content="#000000">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Child Timer">
+  <link rel="apple-touch-icon" href="./assets/apple-touch-icon.png">
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-touch-callout: none;
+    }
+    html, body {
+      width: 100%;
+      height: 100%;
+      background-color: #000000;
+      overflow: hidden;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+    #app-container {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: #000000;
+      overflow: hidden;
+    }
+    canvas#timer-canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+    }
+    /* Play Button */
+    #play-btn {
+      position: absolute;
+      border-radius: 50%;
+      border: 3px solid #FFFDF8;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 10;
+      transition: opacity 0.3s ease, transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+      transform: scale(0.8);
+      opacity: 0;
+      pointer-events: none;
+      animation: pulse-glow 1.4s infinite alternate ease-in-out;
+    }
+    #play-btn.visible {
+      opacity: 1;
+      transform: scale(1);
+      pointer-events: auto;
+    }
+    #play-btn svg {
+      width: 55%;
+      height: 55%;
+      fill: #FFFDF8;
+      margin-left: 6%;
+    }
+    @keyframes pulse-glow {
+      0% { transform: scale(0.96); }
+      100% { transform: scale(1.05); }
+    }
+
+    /* Semicircle Settings Handle on Right Edge */
+    #settings-handle {
+      position: absolute;
+      right: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 28px;
+      height: 56px;
+      background-color: rgba(30, 34, 38, 0.92);
+      border: 1px solid #38404A;
+      border-right: none;
+      border-top-left-radius: 28px;
+      border-bottom-left-radius: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 15;
+      transition: opacity 0.3s ease;
+    }
+    #settings-handle.hidden {
+      display: none;
+    }
+    #settings-handle .grip {
+      width: 3px;
+      height: 18px;
+      border-radius: 1.5px;
+      background-color: #4AC4B5;
+    }
+
+    /* Settings Side Drawer */
+    #settings-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.6);
+      z-index: 50;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+      display: flex;
+      justify-content: flex-end;
+    }
+    #settings-overlay.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    #settings-panel {
+      width: 360px;
+      max-width: 85vw;
+      height: 100%;
+      background: #181B1E;
+      border-left: 1px solid #2C3238;
+      border-top-left-radius: 28px;
+      border-bottom-left-radius: 28px;
+      box-shadow: -10px 0 30px rgba(0, 0, 0, 0.7);
+      padding: 20px 22px;
+      display: flex;
+      flex-direction: column;
+      transform: translateX(100%);
+      transition: transform 0.32s cubic-bezier(0.1, 0.9, 0.2, 1);
+      overflow: hidden;
+      position: relative;
+    }
+    #settings-overlay.open #settings-panel {
+      transform: translateX(0);
+    }
+    #settings-scroll-content {
+      flex: 1;
+      overflow-y: auto;
+      overflow-x: hidden;
+      padding-bottom: 50px;
+      scrollbar-width: thin;
+      scrollbar-color: #2C3238 transparent;
+    }
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 18px;
+    }
+    .panel-header h2 {
+      color: #FFFFFF;
+      font-size: 20px;
+      font-weight: 700;
+    }
+    .close-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: #282D33;
+      border: none;
+      color: #FFFFFF;
+      font-size: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+    .section-title {
+      color: #8E9BA6;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      margin: 16px 0 8px 0;
+      text-transform: uppercase;
+    }
+    /* Mode Toggle */
+    .mode-toggle {
+      display: flex;
+      background: #24282E;
+      border-radius: 14px;
+      padding: 4px;
+      gap: 6px;
+    }
+    .mode-btn {
+      flex: 1;
+      padding: 10px 0;
+      text-align: center;
+      font-size: 14px;
+      font-weight: 700;
+      border-radius: 10px;
+      cursor: pointer;
+      color: #B0B9C2;
+      transition: background 0.2s, color 0.2s;
+    }
+    .mode-btn.active {
+      background: #4AC4B5;
+      color: #FFFFFF;
+    }
+    /* Color Swatches */
+    .color-swatches {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin: 8px 0;
+    }
+    .color-swatch {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.15s;
+    }
+    .color-swatch.active {
+      box-shadow: 0 0 0 3px #FFFFFF;
+    }
+    .color-swatch svg {
+      width: 20px;
+      height: 20px;
+      fill: #FFFFFF;
+      display: none;
+    }
+    .color-swatch.active svg {
+      display: block;
+    }
+    /* Sound Toggle Switch */
+    .sound-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #24282E;
+      border-radius: 14px;
+      padding: 12px 14px;
+    }
+    .sound-label {
+      color: #FFFFFF;
+      font-size: 14px;
+      font-weight: 600;
+    }
+    .sound-sub {
+      color: #8E9BA6;
+      font-size: 11px;
+      margin-top: 2px;
+    }
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 48px;
+      height: 28px;
+    }
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: #384049;
+      transition: .3s;
+      border-radius: 28px;
+    }
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 20px;
+      width: 20px;
+      left: 4px;
+      bottom: 4px;
+      background-color: white;
+      transition: .3s;
+      border-radius: 50%;
+    }
+    input:checked + .slider {
+      background-color: #4AC4B5;
+    }
+    input:checked + .slider:before {
+      transform: translateX(20px);
+    }
+    /* Help Card */
+    .help-card {
+      background: #22272E;
+      border-radius: 14px;
+      padding: 14px;
+      margin-top: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .help-item {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+    }
+    .help-icon {
+      font-size: 16px;
+    }
+    .help-text h4 {
+      color: #ECEFF1;
+      font-size: 13px;
+      font-weight: 700;
+      margin-bottom: 2px;
+    }
+    .help-text p {
+      color: #9EABB8;
+      font-size: 12px;
+      line-height: 1.35;
+    }
+    /* Floating Scroll Helper Chip */
+    #scroll-help-chip {
+      position: absolute;
+      bottom: 12px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(37, 42, 48, 0.95);
+      border: 1px solid #3B434C;
+      border-radius: 20px;
+      padding: 7px 14px;
+      color: #CFD8DC;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      z-index: 10;
+      transition: opacity 0.25s, transform 0.25s;
+    }
+    #scroll-help-chip.hidden {
+      opacity: 0;
+      pointer-events: none;
+      transform: translate(-50%, 10px);
+    }
+  </style>
+</head>
+<body>
+
+<div id="app-container">
+  <canvas id="timer-canvas"></canvas>
+  
+  <div id="play-btn">
+    <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+  </div>
+
+  <div id="settings-handle">
+    <div class="grip"></div>
+  </div>
+
+  <div id="settings-overlay">
+    <div id="settings-panel">
+      <div class="panel-header">
+        <h2>Réglages & Aide</h2>
+        <button class="close-btn" id="close-settings">&times;</button>
+      </div>
+
+      <div id="settings-scroll-content">
+        <div class="section-title">Style du cadran</div>
+        <div class="mode-toggle">
+          <div class="mode-btn active" id="btn-mode-animals">🦁 Animaux</div>
+          <div class="mode-btn" id="btn-mode-numbers">🔢 Chiffres</div>
+        </div>
+
+        <div class="section-title">Couleur du disque</div>
+        <div class="color-swatches" id="color-swatches-container"></div>
+
+        <div class="section-title">Son & Alertes</div>
+        <div class="sound-row">
+          <div>
+            <div class="sound-label">Sons & Carillon</div>
+            <div class="sound-sub">Carillon kalimba à la fin</div>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="sound-checkbox" checked>
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        <div class="section-title">Aide & Astuces</div>
+        <div class="help-card">
+          <div class="help-item">
+            <div class="help-icon">⏱️</div>
+            <div class="help-text">
+              <h4>Réinitialiser pendant le décompte</h4>
+              <p>Maintenez appuyé le bouton au centre du cadran pendant 3 secondes pour stopper et réinitialiser.</p>
+            </div>
+          </div>
+          <div class="help-item">
+            <div class="help-icon">🔒</div>
+            <div class="help-text">
+              <h4>Sécurité enfant</h4>
+              <p>Ce volet de réglages est automatiquement masqué et inaccessible pendant le compte à rebours.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="scroll-help-chip">
+        Aide & Astuces ⌄
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// --- Audio Synthesis via Web Audio API (No external sound files required) ---
+const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+let audioCtx = null;
+let isSoundEnabled = true;
+
+function initAudio() {
+  if (!audioCtx) {
+    audioCtx = new AudioContextClass();
+  }
+  if (audioCtx.state === 'suspended') {
+    audioCtx.resume();
+  }
+}
+
+function playTone(freq, durationMs, volume = 0.35) {
+  if (!isSoundEnabled || !audioCtx) return;
+  try {
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+
+    // Subtle harmonic warmth
+    const overtone = audioCtx.createOscillator();
+    const overtoneGain = audioCtx.createGain();
+    overtone.type = 'sine';
+    overtone.frequency.setValueAtTime(freq * 2, audioCtx.currentTime);
+    overtoneGain.gain.setValueAtTime(volume * 0.1, audioCtx.currentTime);
+
+    const now = audioCtx.currentTime;
+    const durSec = durationMs / 1000;
+    gain.gain.setValueAtTime(0.001, now);
+    gain.gain.exponentialRampToValueAtTime(volume, now + 0.02);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + durSec);
+
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    overtone.connect(overtoneGain);
+    overtoneGain.connect(gain);
+
+    osc.start(now);
+    overtone.start(now);
+    osc.stop(now + durSec + 0.05);
+    overtone.stop(now + durSec + 0.05);
+  } catch (e) {
+    console.warn(e);
+  }
+}
+
+function playTapSound() {
+  initAudio();
+  playTone(293.66, 80, 0.35); // D4 deep warm tap
+  if (navigator.vibrate) navigator.vibrate(25);
+}
+
+function playStartChime() {
+  initAudio();
+  if (navigator.vibrate) navigator.vibrate(40);
+  playTone(261.63, 150, 0.35); // C4
+  setTimeout(() => playTone(329.63, 220, 0.4), 110); // E4
+}
+
+function playCompletionChime() {
+  initAudio();
+  if (navigator.vibrate) navigator.vibrate([0, 120, 100, 150, 100, 250]);
+  const notes = [
+    { f: 261.63, d: 240 },
+    { f: 329.63, d: 240 },
+    { f: 392.00, d: 280 },
+    { f: 523.25, d: 600 }
+  ];
+  let delay = 0;
+  notes.forEach((n) => {
+    setTimeout(() => playTone(n.f, n.d, 0.45), delay);
+    delay += n.d * 0.75;
+  });
+}
+
+// --- Data Models & Themes ---
+const THEME_COLORS = [
+  { id: 'turquoise', name: 'Turquoise', primary: '#4AC4B5', soft: '#72D7CB', light: '#E4F7F5', dark: '#38A89A' },
+  { id: 'corail', name: 'Corail Time Timer', primary: '#E85D56', soft: '#F28B82', light: '#FCE8E6', dark: '#C53929' },
+  { id: 'bleu', name: 'Bleu Ciel', primary: '#4EA8DE', soft: '#90E0EF', light: '#E8F4F8', dark: '#0077B6' },
+  { id: 'vert', name: 'Vert Menthe', primary: '#57CC99', soft: '#80ED99', light: '#EAF8F0', dark: '#38A3A5' },
+  { id: 'lavande', name: 'Lavande', primary: '#9D80CB', soft: '#C7B8EA', light: '#F3EEFA', dark: '#7451B0' },
+  { id: 'peche', name: 'Pêche Dorée', primary: '#F4A261', soft: '#F8C291', light: '#FDF0E5', dark: '#E76F51' }
+];
+
+const ANIMALS = [
+  { pos: 1, min: 5, name: 'Ours', file: 'ours.png' },
+  { pos: 2, min: 10, name: 'Hibou', file: 'hibou.png' },
+  { pos: 3, min: 15, name: 'Lapin', file: 'lapin.png' },
+  { pos: 4, min: 20, name: 'Renard', file: 'renard.png' },
+  { pos: 5, min: 25, name: 'Croco', file: 'croco.png' },
+  { pos: 6, min: 30, name: 'Zèbre', file: 'zebre.png' },
+  { pos: 7, min: 35, name: 'Singe', file: 'singe.png' },
+  { pos: 8, min: 40, name: 'Éléphant', file: 'elephant.png' },
+  { pos: 9, min: 45, name: 'Girafe', file: 'girafe.png' },
+  { pos: 10, min: 50, name: 'Écureuil', file: 'ecureuil.png' },
+  { pos: 11, min: 55, name: 'Panda', file: 'panda.png' },
+  { pos: 12, min: 60, name: 'Lion', file: 'lion.png' }
+];
+
+// Preload Images
+const loadedImages = {};
+ANIMALS.forEach(a => {
+  const img = new Image();
+  img.src = `./assets/${a.file}`;
+  loadedImages[a.file] = img;
+});
+const foxMascot = new Image();
+foxMascot.src = './assets/ic_app_fox.png';
+
+// State
+let displayMode = localStorage.getItem('child_timer_mode') || 'ANIMALS'; // ANIMALS or NUMBERS
+let currentTheme = THEME_COLORS.find(c => c.id === localStorage.getItem('child_timer_color')) || THEME_COLORS[0];
+isSoundEnabled = localStorage.getItem('child_timer_sound') !== 'false';
+
+let phase = 'SELECTING'; // 'SELECTING', 'RUNNING', 'FINISHED'
+let selectedMinutes = null;
+let timerStartTimestamp = 0;
+let timerDurationMs = 0;
+let remainingRatio = 1.0;
+
+let animatedCenterProgress = 0.35; // 0.35 (left) to 0.50 (center)
+let holdKnobStart = null;
+let holdKnobProgress = 0;
+
+// Canvas setup
+const canvas = document.getElementById('timer-canvas');
+const ctx = canvas.getContext('2d');
+const playBtn = document.getElementById('play-btn');
+const settingsHandle = document.getElementById('settings-handle');
+
+function resizeCanvas() {
+  const dpr = window.devicePixelRatio || 1;
+  canvas.width = window.innerWidth * dpr;
+  canvas.height = window.innerHeight * dpr;
+  ctx.scale(dpr, dpr);
+  render();
+}
+window.addEventListener('resize', resizeCanvas);
+window.addEventListener('orientationchange', () => setTimeout(resizeCanvas, 150));
+
+// --- Render Loop ---
+let lastTime = performance.now();
+
+function animate(time) {
+  const dt = (time - lastTime) / 1000;
+  lastTime = time;
+
+  // Center animation
+  const targetCenter = (phase === 'RUNNING' || phase === 'FINISHED') ? 0.50 : 0.35;
+  animatedCenterProgress += (targetCenter - animatedCenterProgress) * 0.12;
+
+  // Running countdown calculation
+  if (phase === 'RUNNING' && timerDurationMs > 0) {
+    const elapsed = Date.now() - timerStartTimestamp;
+    remainingRatio = Math.max(0, 1 - (elapsed / timerDurationMs));
+    if (remainingRatio <= 0) {
+      phase = 'FINISHED';
+      playCompletionChime();
+    }
+  }
+
+  render();
+  requestAnimationFrame(animate);
+}
+
+function render() {
+  const width = window.innerWidth;
+  const height = window.innerHeight;
+  ctx.clearRect(0, 0, width, height);
+
+  const diameter = Math.min(height * 0.94, width * 0.58);
+  const centerXPx = width * animatedCenterProgress;
+  const centerYPx = height / 2;
+
+  const animalOrbitRadius = diameter * 0.40;
+  const discRadius = diameter * 0.285;
+  const knobRadius = diameter * 0.082;
+  const itemSize = diameter * 0.165;
+
+  // 1. Finished Celebration Sparkles
+  if (phase === 'FINISHED') {
+    const sparkleTime = Date.now() / 1000;
+    const baseAngles = [20, 75, 140, 195, 260, 320];
+    const colors = [currentTheme.primary, currentTheme.soft, '#FFD54F'];
+    baseAngles.forEach((deg, idx) => {
+      const rad = deg * Math.PI / 180;
+      const osc = Math.sin(sparkleTime * 3 + idx) * 12;
+      const dist = (diameter * 0.52) + osc;
+      const sx = centerXPx + dist * Math.cos(rad);
+      const sy = centerYPx + dist * Math.sin(rad);
+
+      ctx.beginPath();
+      ctx.arc(sx, sy, 7 + Math.sin(sparkleTime * 4 + idx) * 3, 0, Math.PI * 2);
+      ctx.fillStyle = colors[idx % colors.length];
+      ctx.globalAlpha = 0.55;
+      ctx.fill();
+      ctx.globalAlpha = 1.0;
+    });
+  }
+
+  // 2. Outer Circular Clock Face Plate (Cream circle)
+  ctx.beginPath();
+  ctx.arc(centerXPx, centerYPx, diameter * 0.49, 0, Math.PI * 2);
+  ctx.fillStyle = '#FFFDF8';
+  ctx.fill();
+  ctx.lineWidth = 3;
+  ctx.strokeStyle = '#E2D8C9';
+  ctx.stroke();
+
+  // 3. Inner Dial Disc Base (Cream)
+  ctx.beginPath();
+  ctx.arc(centerXPx, centerYPx, discRadius, 0, Math.PI * 2);
+  ctx.fillStyle = '#FFFDF9';
+  ctx.fill();
+  ctx.lineWidth = 2;
+  ctx.strokeStyle = '#E2D8C9';
+  ctx.stroke();
+
+  // 4. Subtle Tick Dots around the disc circumference
+  for (let m = 0; m < 60; m++) {
+    const isFive = (m % 5 === 0);
+    const rad = (m * 6 - 90) * Math.PI / 180;
+    const dotDist = discRadius - 8;
+    const dx = centerXPx + dotDist * Math.cos(rad);
+    const dy = centerYPx + dotDist * Math.sin(rad);
+
+    ctx.beginPath();
+    ctx.arc(dx, dy, isFive ? 2.8 : 1.3, 0, Math.PI * 2);
+    ctx.fillStyle = isFive ? 'rgba(62,69,73,0.45)' : 'rgba(62,69,73,0.2)';
+    ctx.fill();
+  }
+
+  // 5. Colored Sector (Clockwise from 12h)
+  let sweepAngle = 0;
+  if (phase === 'RUNNING') {
+    sweepAngle = (selectedMinutes || 0) * 6 * remainingRatio;
+  } else if (selectedMinutes && phase !== 'FINISHED') {
+    sweepAngle = selectedMinutes * 6;
+  }
+
+  if (sweepAngle > 0.5) {
+    const startRad = -Math.PI / 2;
+    const endRad = startRad + (sweepAngle * Math.PI / 180);
+
+    ctx.save();
+    ctx.beginPath();
+    ctx.moveTo(centerXPx, centerYPx);
+    ctx.arc(centerXPx, centerYPx, discRadius - 1, startRad, endRad);
+    ctx.closePath();
+
+    const grad = ctx.createRadialGradient(centerXPx, centerYPx, 10, centerXPx, centerYPx, discRadius);
+    grad.addColorStop(0, currentTheme.soft);
+    grad.addColorStop(1, currentTheme.primary);
+    ctx.fillStyle = grad;
+    ctx.fill();
+
+    // Boundary edge line
+    ctx.beginPath();
+    ctx.moveTo(centerXPx, centerYPx);
+    ctx.lineTo(centerXPx + (discRadius - 1) * Math.cos(endRad), centerYPx + (discRadius - 1) * Math.sin(endRad));
+    ctx.lineWidth = 2.5;
+    ctx.strokeStyle = currentTheme.light;
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  // 6. Tactile Center Knob
+  ctx.beginPath();
+  ctx.arc(centerXPx, centerYPx, knobRadius, 0, Math.PI * 2);
+  const knobGrad = ctx.createLinearGradient(centerXPx - knobRadius, centerYPx - knobRadius, centerXPx + knobRadius, centerYPx + knobRadius);
+  knobGrad.addColorStop(0, '#FFFDF9');
+  knobGrad.addColorStop(1, '#EFE8DD');
+  ctx.fillStyle = knobGrad;
+  ctx.fill();
+  ctx.lineWidth = 1.5;
+  ctx.strokeStyle = 'rgba(226, 216, 201, 0.7)';
+  ctx.stroke();
+
+  // Progress ring during 3s hold reset
+  if (holdKnobProgress > 0) {
+    ctx.beginPath();
+    ctx.arc(centerXPx, centerYPx, knobRadius + 4, -Math.PI / 2, -Math.PI / 2 + (holdKnobProgress * Math.PI * 2));
+    ctx.lineWidth = 3.5;
+    ctx.strokeStyle = currentTheme.primary;
+    ctx.stroke();
+  }
+
+  // 7. Center Mascot / Replay when finished
+  if (phase === 'FINISHED') {
+    const mascotSize = itemSize * 1.35;
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(centerXPx, centerYPx, mascotSize / 2, 0, Math.PI * 2);
+    ctx.fillStyle = currentTheme.light;
+    ctx.fill();
+    ctx.lineWidth = 2.5;
+    ctx.strokeStyle = currentTheme.primary;
+    ctx.stroke();
+
+    if (foxMascot.complete) {
+      ctx.drawImage(foxMascot, centerXPx - (mascotSize * 0.42), centerYPx - (mascotSize * 0.42), mascotSize * 0.84, mascotSize * 0.84);
+    }
+    // Replay badge
+    ctx.beginPath();
+    ctx.arc(centerXPx + (mascotSize * 0.32), centerYPx + (mascotSize * 0.32), 12, 0, Math.PI * 2);
+    ctx.fillStyle = currentTheme.primary;
+    ctx.fill();
+    ctx.fillStyle = '#FFFFFF';
+    ctx.font = 'bold 12px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('↺', centerXPx + (mascotSize * 0.32), centerYPx + (mascotSize * 0.32));
+    ctx.restore();
+  }
+
+  // 8. 12 Animals or Numbers around dial
+  ANIMALS.forEach(animal => {
+    const isSelected = (selectedMinutes === animal.min);
+    const rad = ((animal.pos % 12) * 30 - 90) * Math.PI / 180;
+    const ax = centerXPx + animalOrbitRadius * Math.cos(rad);
+    const ay = centerYPx + animalOrbitRadius * Math.sin(rad);
+
+    ctx.save();
+    if (isSelected) {
+      ctx.beginPath();
+      ctx.arc(ax, ay, itemSize * 0.54, 0, Math.PI * 2);
+      ctx.fillStyle = currentTheme.light;
+      ctx.fill();
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = currentTheme.primary;
+      ctx.stroke();
+    }
+
+    if (displayMode === 'ANIMALS') {
+      const img = loadedImages[animal.file];
+      if (img && img.complete) {
+        const renderSize = isSelected ? itemSize * 1.15 : itemSize;
+        ctx.drawImage(img, ax - renderSize / 2, ay - renderSize / 2, renderSize, renderSize);
+      }
+    } else {
+      // Numbers mode
+      const badgeR = (itemSize * 0.46);
+      ctx.beginPath();
+      ctx.arc(ax, ay, badgeR, 0, Math.PI * 2);
+      ctx.fillStyle = isSelected ? currentTheme.primary : '#F7F2EA';
+      ctx.fill();
+      ctx.lineWidth = isSelected ? 2 : 1;
+      ctx.strokeStyle = isSelected ? currentTheme.dark : '#E2D8C9';
+      ctx.stroke();
+
+      ctx.fillStyle = isSelected ? '#FFFFFF' : '#3E4549';
+      ctx.font = 'bold ' + (animal.min >= 10 ? '18px' : '20px') + ' -apple-system, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(animal.min.toString(), ax, ay + 1);
+    }
+    ctx.restore();
+  });
+
+  // Position Play Button
+  if (phase === 'SELECTING' && selectedMinutes) {
+    const playTargetX = width * 0.77;
+    const playSize = Math.max(84, Math.min(120, Math.min(width, height) * 0.26));
+    playBtn.style.width = `${playSize}px`;
+    playBtn.style.height = `${playSize}px`;
+    playBtn.style.left = `${playTargetX - playSize / 2}px`;
+    playBtn.style.top = `${centerYPx - playSize / 2}px`;
+    playBtn.style.background = `linear-gradient(135deg, ${currentTheme.soft}, ${currentTheme.primary})`;
+    playBtn.classList.add('visible');
+  } else {
+    playBtn.classList.remove('visible');
+  }
+
+  // Settings Handle visibility
+  if (phase === 'SELECTING') {
+    settingsHandle.classList.remove('hidden');
+    settingsHandle.querySelector('.grip').style.backgroundColor = currentTheme.primary;
+  } else {
+    settingsHandle.classList.add('hidden');
+  }
+}
+
+// --- User Interaction Handling ---
+function getPointerPos(e) {
+  const rect = canvas.getBoundingClientRect();
+  const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+  const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+  return { x: clientX - rect.left, y: clientY - rect.top };
+}
+
+function handlePointerDown(e) {
+  const { x, y } = getPointerPos(e);
+  const width = window.innerWidth;
+  const height = window.innerHeight;
+  const diameter = Math.min(height * 0.94, width * 0.58);
+  const centerXPx = width * animatedCenterProgress;
+  const centerYPx = height / 2;
+  const knobRadius = diameter * 0.082;
+  const animalOrbitRadius = diameter * 0.40;
+  const itemSize = diameter * 0.165;
+
+  const distToCenter = Math.hypot(x - centerXPx, y - centerYPx);
+
+  // Knob Tap / Long Press
+  if (distToCenter <= knobRadius * 1.5 || (phase === 'FINISHED' && distToCenter <= itemSize)) {
+    if (phase === 'FINISHED') {
+      phase = 'SELECTING';
+      selectedMinutes = null;
+      return;
+    }
+    // Start 3s hold timer to reset
+    holdKnobStart = Date.now();
+    const interval = setInterval(() => {
+      if (!holdKnobStart) {
+        clearInterval(interval);
+        return;
+      }
+      const elapsed = Date.now() - holdKnobStart;
+      holdKnobProgress = Math.min(1, elapsed / 3000);
+      if (holdKnobProgress >= 1) {
+        clearInterval(interval);
+        holdKnobStart = null;
+        holdKnobProgress = 0;
+        phase = 'SELECTING';
+        selectedMinutes = null;
+        if (navigator.vibrate) navigator.vibrate([0, 100, 50, 150]);
+      }
+    }, 50);
+    return;
+  }
+
+  // Animals selection
+  if (phase === 'SELECTING') {
+    ANIMALS.forEach(animal => {
+      const rad = ((animal.pos % 12) * 30 - 90) * Math.PI / 180;
+      const ax = centerXPx + animalOrbitRadius * Math.cos(rad);
+      const ay = centerYPx + animalOrbitRadius * Math.sin(rad);
+      if (Math.hypot(x - ax, y - ay) <= itemSize * 0.65) {
+        selectedMinutes = animal.min;
+        playTapSound();
+      }
+    });
+  }
+}
+
+function handlePointerUp() {
+  holdKnobStart = null;
+  holdKnobProgress = 0;
+}
+
+canvas.addEventListener('mousedown', handlePointerDown);
+window.addEventListener('mouseup', handlePointerUp);
+canvas.addEventListener('touchstart', (e) => { e.preventDefault(); handlePointerDown(e); }, { passive: false });
+window.addEventListener('touchend', handlePointerUp);
+
+// Play Button Click
+playBtn.addEventListener('click', () => {
+  if (phase === 'SELECTING' && selectedMinutes) {
+    timerDurationMs = selectedMinutes * 60 * 1000;
+    timerStartTimestamp = Date.now();
+    remainingRatio = 1.0;
+    phase = 'RUNNING';
+    playStartChime();
+  }
+});
+
+// --- Settings Drawer ---
+const settingsOverlay = document.getElementById('settings-overlay');
+const closeSettingsBtn = document.getElementById('close-settings');
+const btnAnimals = document.getElementById('btn-mode-animals');
+const btnNumbers = document.getElementById('btn-mode-numbers');
+const soundCheckbox = document.getElementById('sound-checkbox');
+const colorSwatchesContainer = document.getElementById('color-swatches-container');
+const scrollContent = document.getElementById('settings-scroll-content');
+const scrollHelpChip = document.getElementById('scroll-help-chip');
+
+settingsHandle.addEventListener('click', () => {
+  settingsOverlay.classList.add('open');
+  checkScroll();
+});
+closeSettingsBtn.addEventListener('click', () => settingsOverlay.classList.remove('open'));
+settingsOverlay.addEventListener('click', (e) => {
+  if (e.target === settingsOverlay) settingsOverlay.classList.remove('open');
+});
+
+// Mode switch
+btnAnimals.addEventListener('click', () => {
+  displayMode = 'ANIMALS';
+  localStorage.setItem('child_timer_mode', 'ANIMALS');
+  btnAnimals.classList.add('active');
+  btnNumbers.classList.remove('active');
+});
+btnNumbers.addEventListener('click', () => {
+  displayMode = 'NUMBERS';
+  localStorage.setItem('child_timer_mode', 'NUMBERS');
+  btnNumbers.classList.add('active');
+  btnAnimals.classList.remove('active');
+});
+if (displayMode === 'NUMBERS') {
+  btnNumbers.classList.add('active');
+  btnAnimals.classList.remove('active');
+}
+
+// Color Swatches
+THEME_COLORS.forEach(c => {
+  const el = document.createElement('div');
+  el.className = `color-swatch ${c.id === currentTheme.id ? 'active' : ''}`;
+  el.style.backgroundColor = c.primary;
+  el.innerHTML = '<svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>';
+  el.addEventListener('click', () => {
+    currentTheme = c;
+    localStorage.setItem('child_timer_color', c.id);
+    document.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('active'));
+    el.classList.add('active');
+    btnAnimals.style.backgroundColor = displayMode === 'ANIMALS' ? c.primary : '';
+    btnNumbers.style.backgroundColor = displayMode === 'NUMBERS' ? c.primary : '';
+  });
+  colorSwatchesContainer.appendChild(el);
+});
+
+// Sound Toggle
+soundCheckbox.checked = isSoundEnabled;
+soundCheckbox.addEventListener('change', (e) => {
+  isSoundEnabled = e.target.checked;
+  localStorage.setItem('child_timer_sound', isSoundEnabled);
+});
+
+// Scroll help chip
+function checkScroll() {
+  const hasMore = (scrollContent.scrollHeight - scrollContent.scrollTop - scrollContent.clientHeight) > 30;
+  if (hasMore) {
+    scrollHelpChip.classList.remove('hidden');
+  } else {
+    scrollHelpChip.classList.add('hidden');
+  }
+}
+scrollContent.addEventListener('scroll', checkScroll);
+scrollHelpChip.addEventListener('click', () => {
+  scrollContent.scrollTo({ top: scrollContent.scrollHeight, behavior: 'smooth' });
+});
+
+// Register Service Worker for PWA
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW registration error:', err));
+}
+
+// Initial Canvas Layout & Loop
+resizeCanvas();
+requestAnimationFrame(animate);
+</script>
+</body>
+</html>
