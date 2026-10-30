@@ -5,10 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Child Timer</title>
   
-  <!-- PWA & Apple Web App meta tags -->
+  <!-- PWA & Apple Web App meta tags for full immersive fullscreen -->
   <link rel="manifest" href="./manifest.json">
   <meta name="theme-color" content="#000000">
   <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Child Timer">
   <link rel="apple-touch-icon" href="./assets/apple-touch-icon.png">
@@ -21,23 +22,31 @@
       user-select: none;
       -webkit-user-select: none;
       -webkit-touch-callout: none;
+      -webkit-tap-highlight-color: transparent;
     }
     html, body {
       width: 100%;
       height: 100%;
+      height: 100dvh;
       background-color: #000000;
       overflow: hidden;
+      position: fixed;
+      touch-action: none;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     }
     #app-container {
-      position: relative;
+      position: fixed;
+      top: 0;
+      left: 0;
       width: 100vw;
       height: 100vh;
+      height: 100dvh;
       display: flex;
       align-items: center;
       justify-content: center;
       background-color: #000000;
       overflow: hidden;
+      padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
     }
     canvas#timer-canvas {
       position: absolute;
@@ -965,6 +974,41 @@ scrollContent.addEventListener('scroll', checkScroll);
 scrollHelpChip.addEventListener('click', () => {
   scrollContent.scrollTo({ top: scrollContent.scrollHeight, behavior: 'smooth' });
 });
+
+// Fullscreen & WakeLock Handling (To completely remove any system bars)
+async function requestImmersiveMode() {
+  try {
+    const docEl = document.documentElement;
+    if (docEl.requestFullscreen && !document.fullscreenElement) {
+      await docEl.requestFullscreen().catch(() => {});
+    } else if (docEl.webkitRequestFullscreen && !document.webkitFullscreenElement) {
+      await docEl.webkitRequestFullscreen().catch(() => {});
+    }
+  } catch (e) {}
+
+  // Keep screen awake if supported
+  try {
+    if ('wakeLock' in navigator && !window.wakeLockSentinel) {
+      window.wakeLockSentinel = await navigator.wakeLock.request('screen');
+    }
+  } catch (e) {}
+
+  // Lock orientation to landscape if supported
+  try {
+    if (screen.orientation && screen.orientation.lock) {
+      await screen.orientation.lock('landscape').catch(() => {});
+    }
+  } catch (e) {}
+}
+
+window.addEventListener('touchstart', requestImmersiveMode, { once: true });
+window.addEventListener('click', requestImmersiveMode, { once: true });
+
+// Prevent iOS elastic overscroll & pull-to-refresh
+document.addEventListener('touchmove', (e) => {
+  if (e.target.closest('#settings-scroll-content')) return;
+  e.preventDefault();
+}, { passive: false });
 
 // Register Service Worker for PWA
 if ('serviceWorker' in navigator) {
